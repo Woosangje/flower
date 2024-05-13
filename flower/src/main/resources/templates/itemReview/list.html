@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout}">
+
+<div layout:fragment="content">
+    <th:block layout:fragment="css">
+        <style>/*기존에 있던 css스타일 absolute라서 새로 선언해야한다.*/
+        .repImg {
+            width: 20px;
+            height: 20px;
+        }
+        </style>
+    </th:block>
+
+
+    <div class="admin-product">
+        <div class="details">
+            <div class="row mt-3">
+                <form action="/itemReview/list" method="get">
+                    <div class="col">
+
+                    </div>
+                </form>
+            </div>
+            <div class="row mt-3">
+                <div class="col">
+
+                    <div class="card">
+                        <div class="card-header">
+                            상품이용후기 게시판
+
+                        </div>
+                        <div class="card-body">
+
+                            <div class="row mt-3">
+
+                                <form action="/itemReview/list" method="get">
+                                    <div class="col">
+                                        <input type="hidden" name="size" th:value="${pageRequestDTO.size}">
+                                        <div class="input-group">
+                                            <div class="input-group-prepend">
+                                                <select class="form-select" name="type">
+                                                    <option value="">---</option>
+                                                    <option value="t" th:selected="${pageRequestDTO.type =='t'}">제목
+                                                    </option>
+                                                    <option value="c" th:selected="${pageRequestDTO.type =='c'}">내용
+                                                    </option>
+                                                    <option value="w" th:selected="${pageRequestDTO.type =='w'}">작성자
+                                                    </option>
+                                                    <option value="tc" th:selected="${pageRequestDTO.type =='tc'}">제목
+                                                        내용
+                                                    </option>
+                                                    <option value="tcw" th:selected="${pageRequestDTO.type =='tcw'}">제목
+                                                        내용 작성자
+                                                    </option>
+                                                </select>
+                                            </div>
+                                            <input type="text" class="form-control" name="keyword"
+                                                   th:value="${pageRequestDTO.keyword}">
+                                            <div class="input-group-append">
+                                                <button class="btn btn-outline-secondary btn-search" type="submit">
+                                                    검색
+                                                </button>
+                                                <button class="btn btn-outline-secondary btn-clear" type="button">초기화
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+
+                            <table class="table mt-5">
+                                <thead>
+                                <tr>
+                                    <th scope="col">번호</th>
+                                    <th scope="col">상품정보</th>
+                                    <th scope="col">제목</th>
+                                    <th scope="col">작성자</th>
+                                    <th scope="col">작성일</th>
+                                    <th scope="col">조회</th>
+                                    <th scope="col">첨부</th>
+                                </tr>
+                                </thead>
+                                <tbody th:with="link = ${pageRequestDTO.getLink()}">
+
+                                <tr th:each="dto:${responseDTO.dtoList}">
+
+                                    <th scope="row">[[${dto.irno}]]</th>
+                                    <td><img class="repImg" th:if="${dto.itemReviewImgDto.imgUrl != null}"
+                                             th:src="${dto.itemReviewImgDto.imgUrl}"></td>
+                                    <td><a th:href="|@{/itemReview/read(irno =${dto.irno})}&${link}|">
+                                        [[${dto.rtitle}]] </a></td>
+                                    <td>[[${dto.rname}]]</td>
+                                    <td>[[${#temporals.format(dto.regTime, 'yyyy-MM-dd')}]]</td>
+                                    <td>[[${dto.view}]]</td>
+                                    <td>아이콘</td>
+                                </tr>
+                                </tbody>
+                            </table>
+
+                            <div class="float-end">
+
+                                <ul class="pagination flex-wrap h-100 justify-content-center align-items-center">
+
+                                    <li class="page-item" th:if="${responseDTO.prev}">
+                                        <a class="page-link" th:data-num="${responseDTO.start -1}">Previous</a>
+                                        <!--/*   Previous 버튼 사용  */-->
+                                    </li>
+
+                                    <th:block th:each="i: ${#numbers.sequence(responseDTO.start, responseDTO.end)}">
+                                        <!--/*   특정 범위 숫자를 만듬. numbers.sequence(start, end, step)  */-->
+                                        <li th:class="${responseDTO.page == i}?'page-item active':'page-item'">
+                                            <!--/*   responseDTO.page이 i와 같으면 th:class="'page-item active'"
+                                              아니면 th:class="'page-item'" 적용 (버튼 색과 관련)
+                                              */-->
+                                            <a class="page-link" th:data-num="${i}">[[${i}]]</a>
+                                            <!--/*   /board/list?page=i   */-->
+                                        </li>
+                                    </th:block>
+
+                                    <li class="page-item" th:if="${responseDTO.next}">
+                                        <a class="page-link" th:data-num="${responseDTO.end + 1}">Next</a>
+                                        <!--/*   Next 버튼 사용  */-->
+                                    </li>
+                                </ul>
+                            </div>
+                            <span><a th:href="@{/itemReview/register}">
+                             <button type="button" class="btn btn-outline-primary">상품후기등록</button>
+                     </a></span>
+                        </div><!--end card body-->
+                    </div><!--end card-->
+                </div><!-- end col-->
+            </div><!-- end row-->
+
+
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+        </div><!--detail end-->
+    </div>
+</div>
+<!--이벤트 처리 : 페이지 번호 클릭, 검색,필터링 조건-->
+<script layout:fragment="script" th:inline="javascript">
+
+
+    var searchForm = $("#searchForm");
+
+    $('.btn-search').click(function (e) {
+
+        searchForm.submit();
+
+    });
+
+    $('.btn-clear').click(function (e) {
+
+        searchForm.empty().submit();
+
+    });
+
+    //페이징 처리
+    document.querySelector(".pagination").addEventListener("click", function (e) {
+
+        e.preventDefault()  // 1. a 태그를 눌렀을때도 href 링크로 이동하지 않게 할 경우
+                            // 2. form 안에 submit 역할을 하는 버튼을 눌렀어도 새로 실행하지 않게 하고싶을 경우 (submit은 작동됨)
+        e.stopPropagation() // 부모 엘리먼트에게도 이벤트가 전파 됨을 알 수 있다.
+                            // 이때 사용하는 것이 e.stopPropagation 이다. e.stopPropagation는 이벤트가 상위 엘리먼트에 전달되지 않게 막아 준다.
+
+        const target = e.target  // 속성을 사용하여 이벤트 위임을 구현할 수 있습니다
+        // var는 함수 스코프와 호이스팅의 특성을 가지며, 글로벌 객체의 속성으로 추가됩니다.
+        // let과 const는 블록 스코프를 가지며, const는 재할당과 재선언이 불가능합니다.
+
+        if (target.tagName !== 'A') {
+            return
+        }
+        // 페이징 처리에 사용된 data-num를 num 변수에 넣는다.
+        const num = target.getAttribute("data-num")
+
+        // form 태그에 대한 정보를 담는다.  <form action="/board/list" method="get">
+        const formObj = document.querySelector("form")
+
+        // get정보에 page=num 값 추가
+        formObj.innerHTML += `<input type='hidden' name='page' value='${num}'>`
+        // 저장
+        formObj.submit();
+
+    }, false)
+    // 양식 .addEventListener("이벤트 타입", function (e){ 콜백함수 }, 이벤트 전파)
+    // 이벤트 전파 : 부모-자식의 계층 구조로 이루어진 각각의 요소에 이벤트를 부여할 때 이벤트 발생순서를 정함
+    // false : 이벤트 버블링(자식->부모) , true : 이벤트 캡처링(부모->자식)
+
+    document.querySelector(".clearBtn").addEventListener("click", function (e) {
+        e.preventDefault()
+        e.stopPropagation()
+
+        self.location = '/itemReview/list'
+
+    }, false)
+
+    //show modal
+    const result = [[${responseDTO}]]
+    // BoardController에 resulte = 게시물번호 처리용
+    const modal = new bootstrap.Modal(document.querySelector(".modal")) // 112행 모달 처리
+
+    if (result) {
+        modal.show()
+    }
+</script>
+</html>

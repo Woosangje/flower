@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout}">
+
+<div layout:fragment="script">
+    <script type="text/javascript">
+        $('#checkPwd').click(function() {
+        const checkPassword = $('#password').val();
+        if(!checkPassword || checkPassword.trim() === ""){
+            alert("비밀번호를 입력하세요.");
+        } else{
+            $.ajax({
+                type: 'GET',
+                url: '/member/check-pwd',
+                data: {'checkPassword': checkPassword},
+                datatype: "text"
+            }).done(function(result){
+                console.log(result);
+                if(result){
+                    console.log("비밀번호 일치");
+                    window.location.href="/member/modify";
+                } else if(!result){
+                    console.log("비밀번호 틀림");
+                    // 비밀번호가 일치하지 않으면
+                    alert("비밀번호가 맞지 않습니다.");
+                    window.location.reload();
+                }
+            }).fail(function(error){
+                alert(JSON.stringify(error));
+            })
+        }
+    });
+    </script>
+</div>
+<div layout:fragment="content">
+    <div class="check-pwd">
+        <div class="top">
+            <div class="heading-check-out">Check Your PW</div>
+            <div class="overlap-group">
+                <div class="link-home">비밀번호 확인</div>
+            </div>
+        </div>
+        <div class="details">
+            <div class="heading">
+                <p class="p">비밀번호 입력 후 개인 정보를 수정할 수 있습니다.</p>
+                <img class="family" th:src="@{/img/family.png}"/>
+            </div>
+
+            <div id="searchI">
+                <div class="overlap-2">
+                    <label class="text-wrapper-5">비밀번호 확인</label>
+                    <div class="text-wrapper-6">*</div>
+                </div>
+                <div class="overlap-3">
+                    <input class="input-2" type="password" id="password" name="password" placeholder="비밀번호를 입력하세요">
+                </div>
+                <div class="group">
+                    <div>
+                        <button id="checkPwd" class="div-wrapper">확인
+                        </button>
+                    </div>
+                </div>
+                <div class="overlap-wrapper">
+                    <div class="overlap-4">
+                        <a th:href="@{/mypage}">
+                            <div class="text-wrapper-9">취소</div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</html>

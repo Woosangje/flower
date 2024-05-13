@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout}">
+
+<div layout:fragment="content">
+
+    <style>
+        .footer .footer {
+            top: 1108px;
+        }
+    </style>
+
+    <div class="check-out">
+        <div class="top">
+            <div class="heading-check-out">Check Out</div>
+            <div class="overlap-group">
+                <div class="link-home">주문/결제하기</div>
+            </div>
+        </div>
+        <div class="details">
+            <div class="heading">
+                <div class="symbol-3"></div>
+                <p class="have-a-coupon-click">Have a coupon? Click here to enter your code</p>
+            </div>
+            <div class="div-wrapper">
+                <div class="text-wrapper-3">주문자 정보</div>
+            </div>
+            <div class="text-wrapper-4">이름</div>
+            <input class="input" type="text" name="name">
+            <div class="text-wrapper-5">핸드폰 번호</div>
+            <div class="overlap">
+                <div class="text-wrapper-6">주소</div>
+                <div class="overlap-2">
+                    <div class="div-placeholder-wrapper">
+                        <input class="div-placeholder" placeholder="Street Address" type="text"/>
+                    </div>
+                    <img class="group" src="img/group-318.png"/>
+                </div>
+            </div>
+            <div class="input-2">
+                <div class="div-placeholder-2"><p class="p">Apartment, suite, unite ect (optinal)</p></div>
+            </div>
+            <div class="text-wrapper-7">핸드폰 번호</div>
+            <div class="input-3"></div>
+            <div class="text-wrapper-8">Email</div>
+            <div class="input-4"></div>
+            <div class="input-5"></div>
+            <div class="heading-2">
+                <div class="text-wrapper-3">받는 분</div>
+                <div class="group-2">
+                    <input type="checkbox" id="keep" name="remember-me" class="input_keep" value="off">
+                    <label for="keep" class="text-wrapper-9">주문자와 동일</label>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="order">
+            <div th:each="cartItem : ${cartItems}">
+                <div class="heading-3">
+                    <div class="text-wrapper-10">결제상세</div>
+                </div>
+                <div class="div-checkout-order">
+                    <div class="text-wrapper-11">상품명</div>
+                    <div class="text-wrapper-12">가격</div>
+                </div>
+
+                <div class="list-item">
+                    <div class="text-wrapper-13" th:text="${cartItem.itemNm}"></div>
+                    <div class="text-wrapper-14" th:text="${cartItem.price}"></div>
+                </div>
+                <div class="list">
+                    <div class="item">
+                        <div class="text-wrapper-18">배송비</div>
+                        <div class="text-wrapper-19">3500원</div>
+                    </div>
+                    <div class="item-2">
+                        <div class="text-wrapper-20">총 주문 금액</div>
+                        <div class="text-wrapper-19"></div>
+                    </div>
+                </div>
+                <button class="button">
+                    <div class="text-wrapper-21">PLACE ORDER</div>
+                </button>
+            </div>
+        </div>
+
+    </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // 페이지 로드 시, URL 매개변수에서 cartItemId를 읽어와서 처리
+            var urlParams = new URLSearchParams(window.location.search);
+            var cartItemId = urlParams.get('cartItemId');
+
+            if (cartItemId) {
+                // 이제 cartItemId를 사용하여 Checkout 페이지에서 필요한 처리를 수행
+                console.log("카트 아이템 ID:", cartItemId);
+            }
+        });
+    </script>
+</div>
+</html>

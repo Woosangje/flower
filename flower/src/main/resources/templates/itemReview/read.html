@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/layout}">
+<head>
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+
+</head>
+
+<div layout:fragment="content">
+    <th:block layout:fragment="css">
+        <style>/*기존에 있던 css스타일 absolute라서 새로 선언해야한다.*/
+        .repImg {
+            width: 50px;
+            height: 50px;
+        }
+
+
+        .star-yellow {
+            color: #f7dd32;
+        }
+        </style>
+    </th:block>
+    <div class="admin-product">
+        <div class="details">
+            <form role="form" method="post" th:object="${itemReviewDto}">
+                <h1 class="mt-4">상품이용후기 게시판</h1>
+                <div>
+                    <table class="table">
+                        <tr>
+                            <th scope="row">제목</th>
+                            <td colspan="5">
+                                <input type="text" class="form-control" th:value="${itemReviewDto.rtitle}" name="rtitle" readonly>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row">작성자</th>
+                            <td colspan="1">
+                                <input type="text" class="form-control" th:value="${itemReviewDto.rname}" name="rname" readonly>
+                            </td>
+
+                            <th scope="row">작성일</th>
+                            <td colspan="1">
+                                <label type="text" name="regTime"
+                                       th:text="${#temporals.format(itemReviewDto.regTime, 'yyyy-MM-dd')}">
+                                </label>
+                            </td>
+                            <th scope="row">조회수</th>
+                            <td colspan="1">
+                                <input type="text" th:field="${itemReviewDto.view}" class="" name="view" readonly>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row">상품정보</th>
+                            <td colspan="3" th:if="${itemReviewDto.itemReviewImgDto.imgUrl != null}">
+                                <img class="repImg" th:src="${itemReviewDto.itemReviewImgDto.imgUrl}">
+                                <label th:text="${itemReviewDto.itemReviewImgDto.oriImgName}"></label>
+                            </td>
+                            <th scope="row">평가점수</th>
+                            <td colspan="1">
+
+                                    <!-- 별 반복문-->
+                                    <th:block class="" th:each="num:${#numbers.sequence(1,itemReviewDto.rstar)}">
+                                      <label class="star-yellow" >★</label>
+
+                                    </th:block>
+                                </label>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <th scope="row">내용</th>
+                            <td colspan="5">
+                                <textarea class="form-control" rows="7" name="rcontent"
+                                          th:field="${itemReviewDto.rcontent}" aria-label="With textarea"
+                                          readonly></textarea>
+                            </td>
+                        </tr>
+                    </table>
+
+
+                    <div class="my-4">
+                        <div class="float-end" th:with="link = ${pageRequestDTO.getLink()}">
+
+                            <a th:href="|@{/itemReview/list}?${link}|" class="text-decoration-none">
+                                <button type="button" class="btn btn-primary">뒤로가기</button>
+                            </a>
+                            <a th:href="|@{/itemReview/modify(irno=${itemReviewDto.irno})}&${link}|"
+                               class="text-decoration-none">
+                                <button type="button" class="btn btn-secondary">수정하기</button>
+                            </a>
+
+                        </div>
+                        <!--   댓글용 (추가,갯수)     -->
+                        <div>
+                            <div class="mt-4">
+                                <h5><span class="badge badge-info addReply">댓글 쓰기</span></h5>
+                                <div class="list-group replyList">
+
+                                </div>
+                            </div>
+
+                            <!--   모달창     -->
+                            <div class="modal" tabindex="-1" role="dialog">
+                                <div class="modal-dialog" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title">coment</h5>
+
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <div class="form-group">
+                                                <div>작성자</div>
+                                                <input class="form-control" type="text" name="replyer"
+                                                       placeholder="">
+                                                <input type="hidden" name="rno">
+                                            </div>
+                                            <div class="form-group">
+                                                <div>내용</div>
+                                                <input class="form-control" type="text" name="replyText">
+                                            </div>
+
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-danger replyRemove">삭제</button>
+                                            <button type="button" class="btn btn-warning replyModify">수정</button>
+                                            <button type="button" class="btn btn-primary replySave">등록</button>
+                                            <button type="button" class="btn btn-outline-secondary replyClose"
+                                                    data-dismiss="modal">닫기
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div><!--modal end-->
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div><!--detail end-->
+    </div>
+
+
+    <script th:inline="javascript">
+        $(document).ready(function () {
+
+            var header = $("meta[name='_csrf_header']").attr('content');//★ 토큰
+            var token = $("meta[name='_csrf']").attr('content');//★ 토큰
+
+            var irno = [[${itemReviewDto.irno}]];
+            //댓글이 추가될 영역
+            var listGroup = $(".replyList");
+
+            //날짜 처리를 위한 함수
+            function formatTime(str) {
+                var date = new Date(str);
+
+                return date.getFullYear() + '/' +
+                    (date.getMonth() + 1) + '/' +
+                    date.getDate() + ' ' +
+                    date.getHours() + ':' +
+                    date.getMinutes();
+            }
+
+            //특정한 게시글의 댓글을 처리하는 함수
+            function loadJSONData() {
+                $.getJSON('/replies/itemReview/' + irno, function (arr) {
+
+                    console.log(arr + "@@JsonData");
+
+                    var str = "";
+
+
+                    $.each(arr, function (idx, reply) {//댓글을 위한 인스턴스 css,html 생성
+                        console.log(reply);
+                        console.log(reply.regDate);
+                        str += '    <div class="card-body border" data-rno="' + reply.rno + '"><b>' + reply.rno + '</b>';
+                        str += '    <h5 class="card-title" >' + reply.text + ' ['+formatTime(reply.regDate) +']'+'</h5>';
+                        str += '    <h6 class="card-subtitle mb-2 text-muted">' + reply.replyer + '</h6>';
+                        str += '    </div>';
+                    })
+
+
+                    listGroup.html(str);
+
+                });
+            }
+
+            window.onload = function () {//웹페이지 실행하지마자 작동된다.
+                loadJSONData();
+            }
+
+
+            //모달 창
+            var modal = $('.modal');
+
+            $(".addReply").click(function () {
+
+                modal.modal('show');
+
+                //댓글 입력하는 부분 초기화 시키기
+                $('input[name="replyText"]').val('');
+                $('input[name="replyer"]').val('');
+
+
+                $(".modal-footer .btn").hide(); //모달 내의 모든 버튼을 안 보이도록
+                $(".replySave, .replyClose").show(); //필요한 버튼들만 보이도록
+
+            });
+
+            $(".replySave").click(function () {//댓글등록
+
+                var reply = {
+                    irno: irno,
+                    text: $('input[name="replyText"]').val(),
+                    replyer: $('input[name="replyer"]').val()
+                }
+                console.log(reply);
+                $.ajax({
+                    url: '/replies/',
+                    beforeSend: function (xhr) {
+                        xhr.setRequestHeader(header, token);//★ security토큰 주의
+                    },
+                    method: 'post',
+                    data: JSON.stringify(reply),
+                    contentType: 'application/json; charset=utf-8',
+                    dataType: 'json',
+                    success: function (data) {
+
+                        var newRno = parseInt(data);
+
+                        alert(newRno + "번 댓글이 등록되었습니다.")
+                        modal.modal('hide');
+                        loadJSONData();
+                    }
+                })
+            });
+
+
+            $(".replyRemove").on("click", function () {//댓글 삭제
+
+                var rno = $("input[name='rno']").val(); //모달 창에 보이는 댓글 번호 hidden처리되어 있음
+
+                $.ajax({
+                    url: '/replies/' + rno,
+                    beforeSend: function (xhr) {
+                        xhr.setRequestHeader(header, token);//★ security토큰 주의
+                    },
+                    method: 'delete',
+
+                    success: function (result) {
+                        console.log("result: " + result);
+                        if (result === 'success') {
+                            alert("댓글이 삭제되었습니다");
+                            modal.modal('hide');
+                            loadJSONData();
+                        }
+                    }
+                })
+            });
+
+            $(".replyModify").click(function () { //댓글수정
+
+                var rno = $("input[name='rno']").val();
+
+                var reply = {
+                    rno: rno,
+                    irno: irno,
+                    text: $('input[name="replyText"]').val(),
+                    replyer: $('input[name="replyer"]').val()
+                }
+
+                console.log(reply);
+                $.ajax({
+                    url: '/replies/' + rno,
+                    beforeSend: function (xhr) {
+                        xhr.setRequestHeader(header, token);//★ security토큰 주의
+                    },
+                    method: 'put',
+                    data: JSON.stringify(reply),
+                    contentType: 'application/json; charset=utf-8',
+                    success: function (result) {
+
+                        console.log("RESULT: " + result);
+
+                        if (result === 'success') {
+                            alert("댓글이 수정되었습니다");
+                            modal.modal('hide');
+                            loadJSONData();
+                        }
+                    }
+                });
+            });
+
+
+        })
+    </script>
+
+</div><!-- content end-->
+</html>
