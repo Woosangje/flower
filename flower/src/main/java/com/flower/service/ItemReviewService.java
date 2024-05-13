@@ -35,9 +35,9 @@ public class ItemReviewService {
     private final MemberRepository memberRepository;
     private final ItemReviewImgRepository itemReviewImgRepository;
 
-    public void create(ItemReviewDto itemReviewDto, String memail, MultipartFile itemReviewImgFile) throws Exception {
+    public void create(ItemReviewDto itemReviewDto, String email, MultipartFile itemReviewImgFile) throws Exception {
 
-        Member member = memberRepository.findByMemail(memail);
+        Member member = memberRepository.findByMemail(email);
         //회원번호로 찾기
         ItemReview itemReview = ItemReview.createReview(itemReviewDto, member);//계정의 mno필요
         itemReviewRepository.save(itemReview);
@@ -52,11 +52,11 @@ public class ItemReviewService {
 
     public void modify(ItemReviewDto itemReviewDto, MultipartFile itemReviewImgFile) throws Exception {
 
-       ItemReview itemReview = itemReviewRepository.findById(itemReviewDto.getIrno())
-               .orElseThrow(EntityNotFoundException::new);
-       itemReview.updateReview(itemReviewDto);
+        ItemReview itemReview = itemReviewRepository.findById(itemReviewDto.getIrno())
+                .orElseThrow(EntityNotFoundException::new);
+        itemReview.updateReview(itemReviewDto);
 
-       Long itemReviewImgIrno = itemReviewDto.getItemReviewImgIrno();//이미지
+        Long itemReviewImgIrno = itemReviewDto.getItemReviewImgIrno();//이미지
 
         //이미지 등록
         itemReviewImgService.updateItemImg(itemReviewImgIrno, itemReviewImgFile);
