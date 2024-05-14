@@ -15,10 +15,11 @@
             width: 50px;
             height: 50px;
         }
-
-
         .star-yellow {
             color: #f7dd32;
+        }
+        .star-gray{
+            color: #dadada;
         }
         </style>
     </th:block>
@@ -61,10 +62,11 @@
                             <td colspan="1">
 
                                     <!-- 별 반복문-->
-                                    <th:block class="" th:each="num:${#numbers.sequence(1,itemReviewDto.rstar)}">
-                                      <label class="star-yellow" >★</label>
+                                <th:block class="" th:each="num:${#numbers.sequence(1,5)}">
+                                   <label class="star-yellow" th:if="${itemReviewDto.rstar >= num}">★</label>
+                                   <label class="star-gray" th:if="${itemReviewDto.rstar < num}">★</label>
 
-                                    </th:block>
+                                </th:block>
                                 </label>
                             </td>
                         </tr>
@@ -88,7 +90,8 @@
                             </a>
                             <a th:href="|@{/itemReview/modify(irno=${itemReviewDto.irno})}&${link}|"
                                class="text-decoration-none">
-                                <button type="button" class="btn btn-secondary">수정하기</button>
+                                <button  type="button" class="btn btn-secondary">수정하기</button>
+                                <!--th:if="${itemReviewDto.email == principal.name}"-->
                             </a>
 
                         </div>
@@ -127,7 +130,7 @@
                                         </div>
                                         <div class="modal-footer">
                                             <button type="button" class="btn btn-danger replyRemove">삭제</button>
-                                            <button type="button" class="btn btn-warning replyModify">수정</button>
+                                            <button type="button" class="btn btn-warning replyModify" >수정</button>
                                             <button type="button" class="btn btn-primary replySave">등록</button>
                                             <button type="button" class="btn btn-outline-secondary replyClose"
                                                     data-dismiss="modal">닫기

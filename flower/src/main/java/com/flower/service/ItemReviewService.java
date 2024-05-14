@@ -7,10 +7,9 @@ import com.flower.dto.PageResponseDTO;
 import com.flower.entity.ItemReview;
 import com.flower.entity.ItemReviewImg;
 import com.flower.entity.Member;
-import com.flower.repository.MemberRepository;
 import com.flower.repository.ItemReviewImgRepository;
 import com.flower.repository.ItemReviewRepository;
-import jakarta.persistence.EntityNotFoundException;
+import com.flower.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.modelmapper.ModelMapper;
@@ -31,7 +30,7 @@ public class ItemReviewService {
 
     private final ModelMapper modelMapper;
     private final ItemReviewRepository itemReviewRepository;
-    private final ItemReviewImgService itemReviewImgService;
+    private final ItemReviewImgService itemReviewImgService;//아이템이미지
     private final MemberRepository memberRepository;
     private final ItemReviewImgRepository itemReviewImgRepository;
 
@@ -51,15 +50,12 @@ public class ItemReviewService {
     }
 
     public void modify(ItemReviewDto itemReviewDto, MultipartFile itemReviewImgFile) throws Exception {
+        ItemReview itemReview = itemReviewRepository.findByIrno(itemReviewDto.getIrno());
 
-        ItemReview itemReview = itemReviewRepository.findById(itemReviewDto.getIrno())
-                .orElseThrow(EntityNotFoundException::new);
         itemReview.updateReview(itemReviewDto);
 
-        Long itemReviewImgIrno = itemReviewDto.getItemReviewImgIrno();//이미지
-
         //이미지 등록
-        itemReviewImgService.updateItemImg(itemReviewImgIrno, itemReviewImgFile);
+        itemReviewImgService.updateItemImg(itemReview.getIrno(), itemReviewImgFile);//이미지등록
 
 
     }
@@ -112,7 +108,7 @@ public class ItemReviewService {
 
     }
 
-    public void remove(Long nno){
+    public void remove(Long nno) {
 
         itemReviewRepository.deleteById(nno);
     }

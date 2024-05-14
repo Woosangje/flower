@@ -2,7 +2,8 @@ package com.flower.entity;
 
 import com.flower.dto.ItemReviewDto;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.*;
 
 @Entity
@@ -23,6 +24,9 @@ public class ItemReview extends BaseTimeEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_mno")//member 클래스의 mno와 매핑
     private Member member;
+
+
+    private String email;  // 수정버튼 노출용
 
     private String rname;
 
@@ -47,6 +51,7 @@ public class ItemReview extends BaseTimeEntity {
 
         ItemReview itemReview = new ItemReview();
         itemReview.setMember(member);//mno 계정번호
+        itemReview.setEmail(member.getMemail());//이메일 받아야 수정,삭제버튼 제어할수 있다.
         itemReview.setRname(member.getMname());//이름은 member에서 받아온다.
         itemReview.setIrno(itemReviewDto.getIrno());
         itemReview.setRtitle(itemReviewDto.getRtitle());

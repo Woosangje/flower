@@ -3,8 +3,8 @@ package com.flower.controller;
 import com.flower.dto.ItemReviewDto;
 import com.flower.dto.PageRequestDTO;
 import com.flower.dto.PageResponseDTO;
-import com.flower.service.ItemReviewService;
 import com.flower.repository.ItemReviewImgRepository;
+import com.flower.service.ItemReviewService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -12,7 +12,10 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.security.Principal;
@@ -49,13 +52,13 @@ public class ItemReviewController {
     public String registerPost(@Valid ItemReviewDto itemReviewDto, BindingResult bindingResult
             , Principal principal, Model model, @RequestParam("itemReviewImgFile")MultipartFile itemReviewImgFile){
 
-        log.info("#####"+itemReviewDto.getRtitle()+ "에러");
-        log.info("#####"+itemReviewImgFile.getOriginalFilename()+ "에러");
 
+        log.info("###" + itemReviewDto.getRstar() +"스타");
         if(bindingResult.hasErrors()){
+            log.info("###"+itemReviewImgFile.getOriginalFilename()+ "has에러");
             return "/itemReview/register";
         }
-        String email = principal.getName();//로그인해야 값받아온다.
+        String email = principal.getName();//로그인해야 값받아온다. getName은 사실 이메일이다.
 
         try{
             itemReviewService.create(itemReviewDto, email, itemReviewImgFile);
@@ -71,43 +74,45 @@ public class ItemReviewController {
 
     }
 
-    @GetMapping({ "/read","/modify"})/// http://localhost/itemReview/read?rno=1&page=1
-    public void read(Long irno, PageRequestDTO pageRequestDTO, Model model){
+    @GetMapping({"/read", "/modify"})/// http://localhost/itemReview/read?rno=1&page=1
+    public void read(Long irno, PageRequestDTO pageRequestDTO, Model model) {
 
-       try{
+        log.info("@@@DTO: " + pageRequestDTO);
+        try {
             ItemReviewDto itemReviewDto = itemReviewService.getItemReviewRead(irno);
             model.addAttribute("itemReviewDto", itemReviewDto);
-           log.info("!!!!!"+ itemReviewDto.getItemReviewImgDto().getImgUrl());
-        }catch(EntityNotFoundException e){
+
+            model.addAttribute("requestDTO", pageRequestDTO);//페이지값출력
+
+        } catch (EntityNotFoundException e) {
             model.addAttribute("errorMessage", "존재하지 않습니다.");
-           log.info("!!!!! error");
+            log.info("!!!!! error");
         }
 
     }
 
     @PostMapping(value="/modify")//테스트시 로그인 할것
     public String modifyPost(@Valid ItemReviewDto itemReviewDto, BindingResult bindingResult
-            , Principal principal, Model model, @RequestParam("itemReviewImgFile")MultipartFile itemReviewImgFile){
+            , Model model, @RequestParam("itemReviewImgFile")MultipartFile itemReviewImgFile){
 
-        log.info("#####"+principal.getName()+ "이름");
         log.info("#####"+itemReviewImgFile+ "파일정보");
         if(bindingResult.hasErrors()){
-            log.info("##### 에러1");
+            log.info("##### has에러");
             return "/itemReview/modify";
         }
 
-        String email = principal.getName();//로그인해야 값받아온다.
 
+        log.info("####"+ itemReviewDto.getRtitle());
         try{
             itemReviewService.modify(itemReviewDto, itemReviewImgFile);
 
         }catch(Exception e){
-            log.info("#####"+principal.getName()+ "에러2");
+            log.info("#####"+ "에러2");
             model.addAttribute("errorMessage", "에러가 발생하였습니다.");
             return "/itemReview/modify";
 
         }
-        return "redirect:/";
+        return "redirect:/itemReview/list";
 
     }
 
@@ -119,11 +124,6 @@ public class ItemReviewController {
 
         return "redirect:/notice/list";
     }
-
-
-
-
-
 
 
 }

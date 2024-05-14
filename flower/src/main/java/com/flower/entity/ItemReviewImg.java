@@ -1,7 +1,8 @@
 package com.flower.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
 @Table(name="item_review_img")
@@ -30,8 +31,5 @@ public class ItemReviewImg extends BaseEntity{
         this.imgUrl = imgUrl;
     }
 
-    public void changeItemImg(ItemReview itemReview){  // board 객체 삭제시 참조 변경용
-        this.itemReview = itemReview;
-    }
 
 }

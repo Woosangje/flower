@@ -42,15 +42,13 @@
             width: 50px;
             height: 50px;
         }
-        .starrr {
-            display: inline-block; }
-        .starrr a {
-            font-size: 16px;
-            padding: 0 1px;
-            cursor: pointer;
-            color: #FFD119;
-            text-decoration: none; }
 
+        .star-yellow {
+            color: #f7dd32;
+        }
+        .star-gray{
+            color: #dadada;
+        }
         </style>
     </th:block>
     <div class="admin-product">
@@ -63,6 +61,7 @@
                             <th scope="row">제목</th>
                             <td colspan="3">
                                 <input type="text" class="form-control" th:value="${itemReviewDto.rtitle}" name="rtitle">
+                                <input type="hidden" name ="irno" th:value="${itemReviewDto.irno}">
                             </td>
                         </tr>
 
@@ -75,10 +74,12 @@
                         <tr>
                             <th scope="row">평가점수</th>
                             <td colspan="3">
-                                <div class="form-group">
-                                    <label >Grade <span class="grade"></span></label>
-                                    <div class='starrr' ></div>
-                                </div>
+                                <input type="hidden" name="rstar" th:value="${itemReviewDto.rstar}">
+                                <th:block class="" th:each="num:${#numbers.sequence(1,5)}">
+                                    <label class="star-yellow" th:if="${itemReviewDto.rstar >= num}">★</label>
+                                    <label class="star-gray" th:if="${itemReviewDto.rstar < num}">★</label>
+
+                                </th:block>
                             </td>
 
                         </tr>
@@ -87,11 +88,15 @@
                                 첨부파일
                             </th>
                             <td colspan="3">
-                                <input type="file" class="file-input" name="itemReviewImgFile"/>
-                                <p style="color:red">
-                                    * 5M 이하만 업로드 가능합니다.<br/>
-                                    * 가로폭이 700px을 넘어가는 이미지의 경우 깨져보일 수 있습니다.
-                                </p>
+                                <div class="form-group" th:field ="${itemReviewDto.itemReviewImgDto}">
+                                    <div class="custom-file img-div">
+                                        <input type="file" class="file-input" name="itemReviewImgFile"/>
+                                        <p style="color:red">
+                                            * 5M 이하만 업로드 가능합니다.<br/>
+                                            * 가로폭이 700px을 넘어가는 이미지의 경우 깨져보일 수 있습니다.
+                                        </p>
+                                    </div>
+                                </div>
                             </td>
                         </tr>
                         <tr>
@@ -114,7 +119,7 @@
                     <div class="my-4">
                         <div class="float-end">
                             <button type="button" class="btn btn-secondary listBtn">목록</button>
-                            <button type="button" class="btn btn-primary modBtn">수정</button>
+                            <button type="submit" class="btn btn-primary modBtn">수정</button>
                             <button type="button" class="btn btn-danger removeBtn">삭제</button>
                         </div>
                     </div>
@@ -124,78 +129,45 @@
     </div>
 </div>
 
-<!--<script th:src="@{/starrr.js}"></script>
-<link th:href="@{/css/starrr.css}" rel="stylesheet">-->
+
 <script layout:fragment="script" th:inline="javascript">
 
+    var actionForm = $("form"); //form 태그 객체
 
-    const errors = [[${errors}]]
-    console.log(errors)
+    $(".removeBtn").click(function(){//삭제
 
-    let errorMsg = ''
+        actionForm
+            .attr("action", "/itemReview/remove")
+            .attr("method","post");
 
-    if(errors){
-        for (let i = 0; i < errors.length; i++) {
-            errorMsg += `${errors[i].field}은(는) ${errors[i].code} \n`
-        }
-        history.replaceState({}, null, null)
-        alert(errorMsg)
-    }
+        actionForm.submit();
 
-
-    $(document).ready(function(e) {
-
-     /*   var grade = 0;//별가져오기
-        /!*var grade = [[${itemReviewDto.rstar}]];*!/
-
-        $('.starrr').starrr({//별점 출력
-            rating: grade,
-            change: function (e, value) {
-                if (value) {
-                    console.log(value);
-                    grade = value;
-                }
-            }
-        });
-
-        var grade = targetReview.find('.card-title span').html();
-        $(".starrr a:nth-child("+grade+")").trigger('click');*/
     });
 
+    $(".listBtn").click(function() {
+
+        //var pageInfo = $("input[name='page']");
+        var page = $("input[name='page']");
+        var type = $("input[name='type']");
+        var keyword = $("input[name='keyword']");
+
+        actionForm.empty(); //form 태그의 모든 내용을 지우고
+
+        actionForm.append(page);
+        actionForm.append(type);
+        actionForm.append(keyword);
 
 
-    const link = [[${pageRequestDTO.getLink()}]]
-    const formObj = document.querySelector("#f1")
+        actionForm
+            .attr("action", "/itemReview/list")
+            .attr("method","get");
 
-    document.querySelector(".modBtn").addEventListener("click", function(e){
-        e.preventDefault()
-        e.stopPropagation()
+        actionForm.submit();
 
-        formObj.action = `/itemReview/modify?${link}`
-        formObj.method ='post'
-        formObj.submit()
+    })
 
 
-    }, false)
 
-
-    document.querySelector(".removeBtn").addEventListener("click", function(e){
-        e.preventDefault()
-        e.stopPropagation()
-        log.info("remove!!!!");
-        formObj.action = `/itemReview/remove`
-        formObj.method ='post'
-        formObj.submit()
-    }, false)
-
-    document.querySelector(".listBtn").addEventListener("click", function(e){
-        e.preventDefault()
-        e.stopPropagation()
-
-        formObj.reset()
-        self.location =`/itemReview/list?${link}`
-
-    }, false)
 
 
 </script>
