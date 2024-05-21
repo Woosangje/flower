@@ -16,20 +16,20 @@
                 </div>
                 <div class="navbar">
                     <a th:href="@{/}">
-                        <div class="nav-list-item-link">Home</div>
+                        <div class="nav-list-item-link">홈</div>
                     </a>
                     <a th:href="@{/#}">
                         <div class="text-wrapper">About us</div>
                     </a>
                     <a th:href="@{/item/list}">
-                        <div class="nav-list-item-link-2">Shop</div>
+                        <div class="nav-list-item-link-2">제품</div>
                     </a>
                     <a th:href="@{/notice/notice}">
-                        <div class="nav-list-item-link-3">Notice</div>
+                        <div class="nav-list-item-link-3">공지사항</div>
                     </a>
                     <li sec:authorize="isAuthenticated() and !hasAuthority('ADMIN')">
                         <a th:href="@{/member/mypage}">
-                            <div class="nav-list-item-link-4">MyPage</div>
+                            <div class="nav-list-item-link-4">마이페이지</div>
                         </a>
                     </li>
                 </div>

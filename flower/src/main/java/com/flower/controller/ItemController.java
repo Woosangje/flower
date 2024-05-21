@@ -1,6 +1,8 @@
 package com.flower.controller;
 
+import com.flower.dto.ItemReviewDto;
 import com.flower.dto.MainItemDto;
+import com.flower.service.ItemReviewService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Controller;
@@ -34,6 +36,8 @@ public class ItemController {
 
     private static final Logger log = LogManager.getLogger(ItemController.class);
     private final ItemService itemService;
+
+    private final ItemReviewService itemReviewService;//상품후기리스트
 
     @GetMapping(value = "/item/register")
     public String itemForm(Model model){
@@ -87,7 +91,6 @@ public class ItemController {
             model.addAttribute("itemFormDto", new ItemFormDto());
             return "item/itemForm";
         }
-
         return "item/itemForm";
     }
 
@@ -132,7 +135,16 @@ public class ItemController {
     public String itemDtl(Model model, @PathVariable("itemId") Long itemId){
         ItemFormDto itemFormDto = itemService.getItemDtl(itemId);
         model.addAttribute("item", itemFormDto);
-        return "item/itemDtl";
+
+        
+        //하단 상품이용후기
+        List<ItemReviewDto> itemReviewDtoList = itemReviewService.ReadList();//pageRequest 사용안한다.
+        log.info("@ReadList" + itemReviewDtoList.get(0).getRname());
+        model.addAttribute("itemReviewDtoList", itemReviewDtoList);
+
+
+        return "item/detail";
+        /*return "item/itemDtl";*/
     }
 
     @GetMapping({"/item/list"})

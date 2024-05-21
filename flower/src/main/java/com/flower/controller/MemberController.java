@@ -1,7 +1,6 @@
 package com.flower.controller;
 
 import com.flower.dto.MemberJoinDto;
-import com.flower.dto.MemberUpdateDto;
 import com.flower.repository.MemberRepository;
 import com.flower.service.MemberService;
 import lombok.RequiredArgsConstructor;

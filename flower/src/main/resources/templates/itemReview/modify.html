@@ -36,6 +36,7 @@
 </div>
 
 <div layout:fragment="content">
+    <link rel="stylesheet" th:href="@{/css/board.css}"/>
     <th:block layout:fragment="css">
         <style>/*기존에 있던 css스타일 absolute라서 새로 선언해야한다.*/
         .repImg {
@@ -54,7 +55,7 @@
     <div class="admin-product">
         <div class="details">
             <form th:action="@{/itemReview/modify}"  method="post" id="f1" enctype="multipart/form-data" >
-                <h1 class="mt-4">상품이용후기 게시판</h1>
+                <h1 class="mt-4">상품이용후기 수정</h1>
                 <div class="">
                     <table class="table">
                         <tr>
@@ -92,19 +93,12 @@
                                     <div class="custom-file img-div">
                                         <input type="file" class="file-input" name="itemReviewImgFile"/>
                                         <p style="color:red">
-                                            * 5M 이하만 업로드 가능합니다.<br/>
+                                            * 20M 이하만 업로드 가능합니다.<br/>
                                             * 가로폭이 700px을 넘어가는 이미지의 경우 깨져보일 수 있습니다.
                                         </p>
                                     </div>
                                 </div>
                             </td>
-                        </tr>
-                        <tr>
-                            <!--<th scope="row">상품정보</th>
-                            <td colspan="3"  th:if="${itemReviewDto.itemReviewImgDto.imgUrl != null}" >
-                                <img class ="repImg"   th:src="${itemReviewDto.itemReviewImgDto.imgUrl}" >
-                                <label  th:text="${itemReviewDto.itemReviewImgDto.oriImgName}"></label>
-                            </td>-->
                         </tr>
                         <tr>
                             <th scope="row">내용</th>
@@ -134,7 +128,7 @@
 
     var actionForm = $("form"); //form 태그 객체
 
-    $(".removeBtn").click(function(){//삭제
+    $(".removeBtn").click(function(){//삭제 버튼
 
         actionForm
             .attr("action", "/itemReview/remove")
@@ -144,7 +138,7 @@
 
     });
 
-    $(".listBtn").click(function() {
+    $(".listBtn").click(function() {//목록 버튼
 
         //var pageInfo = $("input[name='page']");
         var page = $("input[name='page']");

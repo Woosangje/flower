@@ -1,14 +1,28 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
       layout:decorate="~{layout/layout}">
 
 <div layout:fragment="content">
+    <link rel="stylesheet" th:href="@{/css/board.css}"/>
     <th:block layout:fragment="css">
         <style>/*기존에 있던 css스타일 absolute라서 새로 선언해야한다.*/
         .repImg {
             width: 20px;
             height: 20px;
+        }
+
+        .star-yellow {
+            color: #f7dd32;
+        }
+
+        .star-gray {
+            color: #dadada;
+        }
+
+        .border {
+            border: 1px solid red;
         }
         </style>
     </th:block>
@@ -89,8 +103,9 @@
                                     <th scope="row">[[${dto.irno}]]</th>
                                     <td><img class="repImg" th:if="${dto.itemReviewImgDto.imgUrl != null}"
                                              th:src="${dto.itemReviewImgDto.imgUrl}"></td>
-                                    <td><a th:href="|@{/itemReview/read(irno =${dto.irno})}&${link}|">
-                                        [[${dto.rtitle}]] </a></td>
+                                    <td>
+                                        <a th:href="|@{/itemReview/read(irno =${dto.irno})}&${link}|">[[${dto.rtitle}]]</a>
+                                    </td>
                                     <td>[[${dto.rname}]]</td>
                                     <td>[[${#temporals.format(dto.regTime, 'yyyy-MM-dd')}]]</td>
                                     <td>[[${dto.view}]]</td>
@@ -109,24 +124,27 @@
                                     </li>
 
                                     <th:block th:each="i: ${#numbers.sequence(responseDTO.start, responseDTO.end)}">
-                                        <!--/*   특정 범위 숫자를 만듬. numbers.sequence(start, end, step)  */-->
+                                        <!--   responseDTO.start 부터  responseDTO.end까지 foreach출력-->
                                         <li th:class="${responseDTO.page == i}?'page-item active':'page-item'">
-                                            <!--/*   responseDTO.page이 i와 같으면 th:class="'page-item active'"
-                                              아니면 th:class="'page-item'" 적용 (버튼 색과 관련)
-                                              */-->
+                                            <!--responseDTO.page이 i와 같으면 th:class="'page-item active'"
+                                              아니면 th:class="'page-item'" 적용 (버튼 색과 관련)-->
                                             <a class="page-link" th:data-num="${i}">[[${i}]]</a>
-                                            <!--/*   /board/list?page=i   */-->
+                                            <!-- /board/list?page=i   -->
                                         </li>
                                     </th:block>
 
                                     <li class="page-item" th:if="${responseDTO.next}">
                                         <a class="page-link" th:data-num="${responseDTO.end + 1}">Next</a>
-                                        <!--/*   Next 버튼 사용  */-->
+                                        <!--만약 boolean next값이 true이면  Next 버튼 사용  -->
                                     </li>
                                 </ul>
                             </div>
                             <span><a th:href="@{/itemReview/register}">
-                             <button type="button" class="btn btn-outline-primary">상품후기등록</button>
+
+                             <!-- 로그인 된 사용자만 버튼 사용가능-->
+                             <button sec:authorize="isAuthenticated()" type="button"
+                                     class="btn btn-outline-primary">상품후기등록</button>
+
                      </a></span>
                         </div><!--end card body-->
                     </div><!--end card-->
@@ -144,13 +162,13 @@
 
     var searchForm = $("#searchForm");
 
-    $('.btn-search').click(function (e) {
+    $('.btn-search').click(function (e) {//제목, 내용 검색
 
         searchForm.submit();
 
     });
 
-    $('.btn-clear').click(function (e) {
+    $('.btn-clear').click(function (e) {//제목, 내용 초기화
 
         searchForm.empty().submit();
 
@@ -195,13 +213,5 @@
 
     }, false)
 
-    //show modal
-    const result = [[${responseDTO}]]
-    // BoardController에 resulte = 게시물번호 처리용
-    const modal = new bootstrap.Modal(document.querySelector(".modal")) // 112행 모달 처리
-
-    if (result) {
-        modal.show()
-    }
 </script>
 </html>

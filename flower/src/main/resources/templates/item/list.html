@@ -49,7 +49,7 @@
         <form action="/item/list" method="get">
             <div class="section-form-input">
                 <div class="div-placeholder">
-                    <input type="text" id="pnameInput" name="pname" placeholder="Search...">
+                    <input type="text" id="itemNmInput" name="itemNm" placeholder="Search...">
                     <button type="submit" class="section-form-button">검색</button>
                 </div>
             </div>
@@ -61,22 +61,22 @@
                 if (form) {
                     // 이전에 검색한 내용이 URL에 있다면 검색창에 설정
                     var url = new URL(window.location.href);
-                    var pname = url.searchParams.get('pname');
-                    var pnameInput = form.querySelector('#pnameInput');
-                    if (pname && pnameInput) {
-                        pnameInput.value = pname;
+                    var itemNm = url.searchParams.get('itemNm');
+                    var itemNmInput = form.querySelector('#itemNmInput');
+                    if (itemNm && itemNmInput) {
+                        itemNmInput.value = itemNm;
                     }
 
                     form.addEventListener('submit', function (event) {
                         event.preventDefault(); // 기본 제출 동작 방지
 
-                        var pnameInput = form.querySelector('#pnameInput');
-                        if (pnameInput) {
-                            var pnameValue = pnameInput.value;
+                        var itemNmInput = form.querySelector('#itemNmInput');
+                        if (itemNmInput) {
+                            var itemNmValue = itemNmInput.value;
                             var url = new URL('/item/list', window.location.href);
 
                             // pname 파라미터 값 설정
-                            url.searchParams.set('pname', pnameValue);
+                            url.searchParams.set('itemNm', itemNmValue);
 
                             // 새 URL을 사용하여 페이지 이동 (또는 필요한 작업 수행)
                             window.location.href = url.toString();
@@ -121,23 +121,23 @@
                 }
             }
 
-            function searchByCategory(pcate) {
+            function searchByCategory(itemDetail) {
                 var form = document.querySelector('form[action="/item/list"]');
                 if (form) {
-                    var pnameInput = form.querySelector('#pnameInput');
-                    if (pnameInput) {
-                        var pnameValue = pnameInput.value;
+                    var itemNmInput = form.querySelector('#itemNmInput');
+                    if (itemNmInput) {
+                        var itemNmValue = itemNmInput.value;
                         var url = new URL('/item/list', window.location.href);
 
                         // pname 파라미터 값 설정
                         var searchParams = new URLSearchParams(url.search);
-                        if (searchParams.has('pname')) {
-                            pnameValue = searchParams.get('pname');
+                        if (searchParams.has('itemNm')) {
+                            pnameValue = searchParams.get('itemNm');
                         }
-                        url.searchParams.set('pname', pnameValue);
+                        url.searchParams.set('itemNm', itemNmValue);
 
                         // pcate 파라미터 값 설정
-                        url.searchParams.set('pcate', pcate);
+                        url.searchParams.set('itemDetail', itemDetail);
 
                         window.location.href = url.toString();
                     }
@@ -159,7 +159,9 @@
             </div>
 
             <!-- register 버튼 -->
+            <li sec:authorize="isAuthenticated() and !hasAuthority('ADMIN')">
             <button onclick="location.href='/item/register'" class="register-button" style="font-size: 16px; padding: 12px 20px; margin-left: 10px;">Register</button>
+            </li>
         </div>
         <script>
             // register 페이지로 이동하는 함수
@@ -175,22 +177,22 @@
                 if (form) {
                     // 이전에 검색한 내용이 URL에 있다면 검색창에 설정
                     var url = new URL(window.location.href);
-                    var pname = url.searchParams.get('pname');
-                    var pnameInput = form.querySelector('#pnameInput');
-                    if (pname && pnameInput) {
-                        pnameInput.value = pname;
+                    var itemNm = url.searchParams.get('itemNm');
+                    var itemNmInput = form.querySelector('#itemNmInput');
+                    if (itemNm && itemNmInput) {
+                        itemNmInput.value = itemNm;
                     }
 
                     form.addEventListener('submit', function (event) {
                         event.preventDefault(); // 기본 제출 동작 방지
 
-                        var pnameInput = form.querySelector('#pnameInput');
-                        if (pnameInput) {
-                            var pnameValue = pnameInput.value;
+                        var itemNmInput = form.querySelector('#itemNmInput');
+                        if (itemNmInput) {
+                            var itemNmValue = itemNmInput.value;
                             var url = new URL('/item/list', window.location.href);
 
                             // pname 파라미터 값 설정
-                            url.searchParams.set('pname', pnameValue);
+                            url.searchParams.set('itemNm', itemNmValue);
 
                             // 새 URL을 사용하여 페이지 이동 (또는 필요한 작업 수행)
                             window.location.href = url.toString();
@@ -214,9 +216,12 @@
         <th:block th:each="item, status: ${items.getContent()}">
             <!--<th:block th:each="item, status: ${items.getContent()}">-->
             <div class="div-product-item">
-                <img th:src="${item.iimgurl}" class="div-product-item-pic" th:alt="${item.pname}">
-                <div class="heading-piqu-biker">[[${item.pname}]]</div>
-                <div class="heading" data-th-text="| ${#numbers.formatInteger(item.pprice, 3, 'COMMA')} 원 |"></div>
+
+                <a th:href="@{|/item/${item.id}|}">
+                    <img th:src="${item.imgUrl}" class="div-product-item-pic" th:alt="${item.itemNm}">
+                    <div class="heading-piqu-biker" th:text="${item.itemNm}"></div>
+                    <div class="heading" th:text="${#numbers.formatInteger(item.price, 3, 'COMMA')} + ' 원'"></div>
+                </a>
             </div>
         </th:block>
 

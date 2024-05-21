@@ -10,6 +10,7 @@ import com.flower.entity.Member;
 import com.flower.repository.ItemReviewImgRepository;
 import com.flower.repository.ItemReviewRepository;
 import com.flower.repository.MemberRepository;
+import com.flower.repository.ReviewReplyRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.modelmapper.ModelMapper;
@@ -33,6 +34,8 @@ public class ItemReviewService {
     private final ItemReviewImgService itemReviewImgService;//아이템이미지
     private final MemberRepository memberRepository;
     private final ItemReviewImgRepository itemReviewImgRepository;
+
+    private final ReviewReplyRepository reviewReplyRepository;
 
     public void create(ItemReviewDto itemReviewDto, String email, MultipartFile itemReviewImgFile) throws Exception {
 
@@ -108,8 +111,36 @@ public class ItemReviewService {
 
     }
 
-    public void remove(Long nno) {
+    @Transactional
+    public List<ItemReviewDto> ReadList() {//메인이나 아이템 페이지 하단에 있을 리스트
 
-        itemReviewRepository.deleteById(nno);
+        List<ItemReview> reviewList = itemReviewRepository.findAll();
+
+        List<ItemReviewDto> dtoList = reviewList.stream()
+                .map(itemReview -> modelMapper.map(itemReview, ItemReviewDto.class)).collect(Collectors.toList());
+
+        for (ItemReviewDto dto : dtoList) {//리스트에 이미지 넣는과정
+            Long irno = dto.getIrno();
+            ItemReviewImg itemReviewImg = itemReviewImgRepository.findByImgirno(irno);
+            ItemReviewImgDto itemReviewImgDto2 = ItemReviewImgDto.of(itemReviewImg);//이미지 검색
+            dto.setItemReviewImgDto(itemReviewImgDto2);
+        }
+        return dtoList;
+
     }
+    @Transactional
+    public void removeWithReplies(Long irno){
+
+        //댓글 부터 삭제
+        reviewReplyRepository.deleteByIrno(irno);
+        //이미지 삭제
+        itemReviewImgRepository.deleteById(irno);
+
+        itemReviewRepository.deleteById(irno);
+    }
+
+   /* public void remove(Long irno) {
+
+        itemReviewRepository.deleteById(irno);
+    }*/
 }

@@ -35,11 +35,13 @@
 </div>
 
 <div layout:fragment="content">
+    <link rel="stylesheet" th:href="@{/css/board.css}"/>
     <th:block layout:fragment="css">
-        <style>/*기존에 있던 css스타일 absolute라서 새로 선언해야한다.*/
+        <style>
         /*별점 구현*/
         @import url(//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css);
 
+        /*reate 클래스는 별점관련 클래스*/
         .rate {
             display: inline-block;
             border: 0;
@@ -142,7 +144,7 @@
                                 <div class="custom-file img-div">
                                     <input type="file" class="file-input" name="itemReviewImgFile"/>
                                     <p style="color:red">
-                                        * 5M 이하만 업로드 가능합니다.<br/>
+                                        * 20M 이하만 업로드 가능합니다.<br/>
                                         * 가로폭이 700px을 넘어가는 이미지의 경우 깨져보일 수 있습니다.
                                     </p>
                                 </div>
@@ -161,6 +163,7 @@
                 </table>
 
                 <button type="button" class="btn btn-secondary ">목록</button>
+
                 <button type="submit" class="btn  btn-primary ">등록하기</button>
 
             </div>
@@ -173,7 +176,7 @@
 
         $(".btn-secondary").click(function () {//list로 가는 버튼
 
-            //var pageInfo = $("input[name='page']");
+
             var page = $("input[name='page']");
             var type = $("input[name='type']");
             var keyword = $("input[name='keyword']");

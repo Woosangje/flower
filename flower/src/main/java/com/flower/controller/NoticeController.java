@@ -2,11 +2,11 @@ package com.flower.controller;
 
 
 
+import com.flower.service.NoticeService;
 import com.flower.dto.NoticeFormDto;
 import com.flower.dto.PageRequestDTO;
 import com.flower.dto.PageResponseDTO;
 import com.flower.repository.NoticeRepository;
-import com.flower.service.NoticeService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -36,21 +36,21 @@ public class NoticeController {
     }
 
     //# 등록
-   @PostMapping(value = "/notice/register")
+    @PostMapping(value = "/notice/register")
     public String registerPost(@Valid NoticeFormDto noticeFormDto, BindingResult bindingResult
             , Model model){
 
         if(bindingResult.hasErrors()){//필수값 없으면 페이지 이동
-            log.info("에러11111");
+            log.info("##has에러");
+            model.addAttribute("errorMessage", "등록중 에러가 발생하였습니다.");
             return "/notice/register";
         }
 
         try{
             noticeService.saveNotice(noticeFormDto);
-            log.info("성공2222");
         }catch(Exception  e){
             model.addAttribute("errorMessage", "등록중 에러가 발생하였습니다.");
-            return "notice/register";
+            return "/notice/register";
         }
 
         return "redirect:/notice/notice";
@@ -93,12 +93,12 @@ public class NoticeController {
         try{
 
             noticeService.updateNotice(noticeFormDto);
-           /* model.addAttribute("requestDTO", pageRequestDTO);*/
+            /* model.addAttribute("requestDTO", pageRequestDTO);*/
 
         } catch(Exception e){
 
             model.addAttribute("errorMessage", "수정 중 에러가 발생하였습니다.");
-             return "notice/modify";
+            return "notice/modify";
         }
         return "redirect:/notice/notice";
 
@@ -116,16 +116,14 @@ public class NoticeController {
 
 
 
-     @GetMapping(value = "/notice/notice") //페이징이 없는경우, 있는 경우
+    @GetMapping(value = "/notice/notice") //페이징이 없는경우, 있는 경우
     public void listGet(PageRequestDTO pageRequestDTO, Model model){
 
 
-         PageResponseDTO<NoticeFormDto> responseDTO = noticeService.list(pageRequestDTO);
-         model.addAttribute("notice", responseDTO);
+        PageResponseDTO<NoticeFormDto> responseDTO = noticeService.list(pageRequestDTO);
+        model.addAttribute("notice", responseDTO);
 
 
     }
-
-
 
 }

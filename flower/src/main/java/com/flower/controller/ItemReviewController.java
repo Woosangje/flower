@@ -1,10 +1,9 @@
 package com.flower.controller;
 
+import com.flower.service.ItemReviewService;
 import com.flower.dto.ItemReviewDto;
 import com.flower.dto.PageRequestDTO;
 import com.flower.dto.PageResponseDTO;
-import com.flower.repository.ItemReviewImgRepository;
-import com.flower.service.ItemReviewService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -12,13 +11,11 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.security.Principal;
+import java.util.List;
 
 @RequestMapping("/itemReview")
 @Controller
@@ -28,15 +25,18 @@ public class ItemReviewController {
 
     private final ItemReviewService itemReviewService;
 
-    private final ItemReviewImgRepository itemReviewImgRepository;
 
     @GetMapping(value="/list")
-    public void list(PageRequestDTO pageRequestDTO, Model model){
+    public void list(PageRequestDTO pageRequestDTO, Model model ){
 
-       PageResponseDTO<ItemReviewDto> responseDTO = itemReviewService.list(pageRequestDTO);
+        PageResponseDTO<ItemReviewDto> responseDTO = itemReviewService.list(pageRequestDTO);
 
-       model.addAttribute("responseDTO", responseDTO);
+        model.addAttribute("responseDTO", responseDTO);//페이징, 검색, itemReviewDto가 포함
 
+
+        List<ItemReviewDto> itemReviewDtoList = itemReviewService.ReadList();//pageRequest 사용안한다.
+
+        model.addAttribute("itemReviewDtoList", itemReviewDtoList);
 
     }
 
@@ -45,6 +45,7 @@ public class ItemReviewController {
     public String registerGet(Model model, Principal principal){
         model.addAttribute("itemReviewDto", new ItemReviewDto());
         model.addAttribute("userNameDto", principal.getName());
+        log.info("##새로고침 "+principal.getName());
         return "/itemReview/register";
     }
 
@@ -53,19 +54,19 @@ public class ItemReviewController {
             , Principal principal, Model model, @RequestParam("itemReviewImgFile")MultipartFile itemReviewImgFile){
 
 
-        log.info("###" + itemReviewDto.getRstar() +"스타");
         if(bindingResult.hasErrors()){
-            log.info("###"+itemReviewImgFile.getOriginalFilename()+ "has에러");
+            log.info("###has에러");
+            model.addAttribute("errorMessage", "에러가 발생하였습니다.");
+
             return "/itemReview/register";
         }
         String email = principal.getName();//로그인해야 값받아온다. getName은 사실 이메일이다.
 
         try{
             itemReviewService.create(itemReviewDto, email, itemReviewImgFile);
-            log.info("#####"+itemReviewImgFile+ "파일경");
+            log.info("#####"+itemReviewImgFile+ "파일");
 
         }catch(Exception e){
-            log.info("#####"+principal.getName()+ "에러");
             model.addAttribute("errorMessage", "에러가 발생하였습니다.");
             return "/itemReview/register";
 
@@ -75,14 +76,18 @@ public class ItemReviewController {
     }
 
     @GetMapping({"/read", "/modify"})/// http://localhost/itemReview/read?rno=1&page=1
-    public void read(Long irno, PageRequestDTO pageRequestDTO, Model model) {
+    public void read(Long irno, PageRequestDTO pageRequestDTO,Principal principal, Model model) {
+        //principal 메소드 수정버튼 노출에 사용합니다.
 
-        log.info("@@@DTO: " + pageRequestDTO);
+        String userEmail =principal.getName();// 수정, 삭제버튼에 사용
+
         try {
             ItemReviewDto itemReviewDto = itemReviewService.getItemReviewRead(irno);
-            model.addAttribute("itemReviewDto", itemReviewDto);
+            model.addAttribute("itemReviewDto", itemReviewDto);//
 
             model.addAttribute("requestDTO", pageRequestDTO);//페이지값출력
+
+            model.addAttribute("userEmail", userEmail);//수정 버튼 노출
 
         } catch (EntityNotFoundException e) {
             model.addAttribute("errorMessage", "존재하지 않습니다.");
@@ -95,9 +100,10 @@ public class ItemReviewController {
     public String modifyPost(@Valid ItemReviewDto itemReviewDto, BindingResult bindingResult
             , Model model, @RequestParam("itemReviewImgFile")MultipartFile itemReviewImgFile){
 
-        log.info("#####"+itemReviewImgFile+ "파일정보");
+
         if(bindingResult.hasErrors()){
             log.info("##### has에러");
+            model.addAttribute("errorMessage", "에러가 발생하였습니다.");
             return "/itemReview/modify";
         }
 
@@ -107,7 +113,6 @@ public class ItemReviewController {
             itemReviewService.modify(itemReviewDto, itemReviewImgFile);
 
         }catch(Exception e){
-            log.info("#####"+ "에러2");
             model.addAttribute("errorMessage", "에러가 발생하였습니다.");
             return "/itemReview/modify";
 
@@ -117,12 +122,20 @@ public class ItemReviewController {
     }
 
 
-    @PostMapping(value="/itemReview/remove")
-    public String remove(Long irno){//상품후기 삭제
-        log.info("상품 후기 삭제: " +irno);
-        itemReviewService.remove(irno);
+    @PostMapping(value="/remove")
+    public String remove(Long irno, Model model){//상품후기 삭제
 
-        return "redirect:/notice/list";
+        try {
+            /*itemReviewService.remove(irno);*/
+            //댓글 포함 삭제
+            itemReviewService.removeWithReplies(irno);
+
+            //게시물이 삭제되었다면 첨부 파일 삭제
+        }catch(Exception e){
+            model.addAttribute("errorMessage", "에러가 발생하였습니다.");
+        }
+
+        return "redirect:/itemReview/list";
     }
 
 

@@ -4,6 +4,31 @@
       layout:decorate="~{layout/layout}">
 
 <div layout:fragment="content">
+    <th:block layout:fragment="css">
+        <link rel="stylesheet" th:href="@{/css/board.css}"/>
+        <style>/*기존에 있던 css스타일 absolute라서 새로 선언해야한다.*/
+
+        .repImg {
+            width: 100px;
+            height: 100px;
+        }
+
+        .ReviewPosition {
+            position: absolute;
+            top: 600px;
+            width: 1170px;
+
+        }
+
+        .star-yellow {
+            color: #f7dd32;
+        }
+
+        .star-gray {
+            color: #dadada;
+        }
+        </style>
+    </th:block>
 
     <!-- 사용자 스크립트 추가 -->
     <script th:inline="javascript">
@@ -102,40 +127,40 @@
             <div class="div-container">
                 <img class="tablist-item-tab"
                      th:if="${item.itemImgDtoList != null and item.itemImgDtoList.size() > 1 and item.itemImgDtoList[1] != null}"
-                     th:style="'background-image: url(' + ${item.itemImgDtoList[1].iimgurl} + ')'">
+                     th:style="'background-image: url(' + ${item.itemImgDtoList[1].imgUrl} + ')'">
                 <img class="img"
                      th:if="${item.itemImgDtoList != null and item.itemImgDtoList.size() > 1 and item.itemImgDtoList[2] != null}"
-                     th:style="'background-image: url(' + ${item.itemImgDtoList[2]?.iimgurl ?: ''} + ')'">
+                     th:style="'background-image: url(' + ${item.itemImgDtoList[2]?.imgUrl ?: ''} + ')'">
                 <img class="tablist-item-tab-2"
                      th:if="${item.itemImgDtoList != null and item.itemImgDtoList.size() > 1 and item.itemImgDtoList[3] != null}"
-                     th:style="'background-image: url(' + ${item.itemImgDtoList[3]?.iimgurl ?: ''} + ')'">
+                     th:style="'background-image: url(' + ${item.itemImgDtoList[3]?.imgUrl ?: ''} + ')'">
                 <img class="i-fa-play-wrapper"
                      th:if="${item.itemImgDtoList != null and item.itemImgDtoList.size() > 1 and item.itemImgDtoList[4] != null}"
-                     th:style="'background-image: url(' + ${item.itemImgDtoList[4]?.iimgurl ?: ''} + ')'">
+                     th:style="'background-image: url(' + ${item.itemImgDtoList[4]?.imgUrl ?: ''} + ')'">
                 <img class="tabpanel-product-big"
-                     th:style="'background-image: url(' + ${item.itemImgDtoList[0].iimgurl} + ')'">
+                     th:style="'background-image: url(' + ${item.itemImgDtoList[0].imgUrl} + ')'">
             </div>
         </div>
-        <div class="heading" data-th-text="|￦ ${#numbers.formatInteger(item.pprice, 3, 'COMMA')}  |"></div>
+        <div class="heading" data-th-text="|￦ ${#numbers.formatInteger(item.price, 3, 'COMMA')}  |"></div>
 
         <div class="input">
             <input type="number" name="count" id="count" class="div-pro-qty" value="1" min="1"
                    style="text-align : center">
         </div>
 
-        <div th:if="${item.pstatus == T(com.flower.constant.ItemSellStatus).SELL}" class="text-right">
-        <div class="link">
-            <button type="button" class="text-wrapper-4" onclick="addCart()">장바구니 담기
-            </button>
-            <!--<div >ADD TO CART</div>-->
+        <div th:if="${item.ItemSellStatus == T(com.flower.constant.ItemSellStatus).SELL}" class="text-right">
+            <div class="link">
+                <button type="button" class="text-wrapper-4" onclick="addCart()">장바구니 담기
+                </button>
+                <!--<div >ADD TO CART</div>-->
+            </div>
+            <div class="heading-hooded">[[${item.itemNm}]]</div>
+            <div class="link-2">
+                <button type="button" class="text-wrapper-4" onclick="order()">주문하기</button>
+                <!--<div>BUY</div>-->
+            </div>
         </div>
-        <div class="heading-hooded">[[${item.pname}]]</div>
-        <div class="link-2">
-            <button type="button" class="text-wrapper-4" onclick="order()">주문하기</button>
-            <!--<div>BUY</div>-->
-        </div>
-        </div>
-        <div th:unless="${item.pstatus == T(com.flower.constant.ItemSellStatus).SELL}" class="text-right">
+        <div th:unless="${item.ItemSellStatus == T(com.flower.constant.ItemSellStatus).SELL}" class="text-right">
             <button type="button" class="btn btn-danger btn-lg">품절</button>
         </div>
         <div class="frame">
@@ -146,7 +171,67 @@
             <div class="item-tab">
                 <div class="text-wrapper-5">상세 설명</div>
             </div>
+
+
+            <div class="row ReviewPosition"><!--item/detail.html하단에 붙일용도-->
+                <div class="col">
+
+                    <div class="card">
+                        <div class="card-header">
+                            상품 이용 후기 (<label th:text="${itemReviewDtoList.size()}"> </label>)
+
+                        </div>
+                        <div class="card-body">
+
+                            <table class="table mt-5">
+
+                                <tbody th:each="dto:${itemReviewDtoList}">
+
+                                <tr>
+                                    <td colspan="1">
+                                        <th:block th:each="num:${#numbers.sequence(1,5)}">
+                                            <label class="star-yellow" th:if="${dto.rstar >= num}">★</label>
+                                            <label class="star-gray" th:unless="${dto.rstar >= num}">★</label>
+                                        </th:block>
+                                    </td>
+                                    <td colspan="2">
+
+                                    </td>
+                                    <td colspan="2">
+                                        작성자: <label th:text="${dto.rname}" name="rname"></label>
+                                    </td>
+                                    <td colspan="2">
+                                        작성일:
+                                        <label type="text" name="regTime"
+                                               th:text="${#temporals.format(dto.regTime, 'yyyy-MM-dd')}">
+                                        </label>
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td colspan="1">
+                                        <img class="repImg" th:if="${dto.itemReviewImgDto.imgUrl != null}"
+                                             th:src="${dto.itemReviewImgDto.imgUrl}">
+                                    </td>
+                                    <td colspan="6">
+                                        <b>[[${dto.rtitle}]]</b><br>
+                                        <label>[[${dto.rcontent}]]</label>
+                                    </td>
+
+
+                                </tr>
+                                </tbody>
+                            </table>
+
+                        </div><!--end card body-->
+                    </div><!--end card-->
+                </div><!-- end col-->
+            </div><!-- end row 상품 이용 후기-->
         </div>
-    </div>
+
+
+    </div><!--details-->
+
+
 </div>
 </html>

@@ -6,12 +6,11 @@
 <div layout:fragment="script">
     <script type="text/javascript">
         $(document).ready(function () {
-            var errorMessage = [[${errorMessage}]];
-            if (errorMessage != null) {
+            var errorMessage = "[[${errorMessage}]]";
+            if (errorMessage != null  && errorMessage !== "") {
                 alert(errorMessage);
             }
 
-            bindDomEvent();
 
         });
     </script>
@@ -41,7 +40,7 @@
                 <div class="frame-2">등록하기
                     <button type="submit" class="text-wrapper-8"></button>
                 </div>
-                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+
             </form>
         </div>
     </div>

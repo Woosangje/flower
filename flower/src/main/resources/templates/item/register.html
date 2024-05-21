@@ -166,6 +166,7 @@
                             th:formaction="@{'/admin/item/' + ${itemFormDto.id} }" type="submit"
                             class="text-wrapper-16"></button>
                 </div>
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
             </div>
         </form>
     </div>
